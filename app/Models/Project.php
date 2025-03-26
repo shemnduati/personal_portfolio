@@ -16,10 +16,11 @@ class Project extends Model
         'full_description',
         'featured_image_path',
         'project_table',
-        'is_featured'
+        'is_featured',
+        'project_date'
     ];
 
-    public function projectImage()
+    public function projectImages()
     {
         return $this->hasMany(ProjectImage::class);
     }

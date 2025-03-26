@@ -16,7 +16,11 @@ class Blog extends Model
         'content',
         'featured_image_path',
         'publised_at',
-        'is_publised'
+        'is_published',
+    ];
+
+    protected $casts = [
+        'is_published' => 'boolean',
     ];
 
     

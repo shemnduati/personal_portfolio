@@ -12,7 +12,8 @@ class CvUpload extends Model
     protected $fillable = [
         'file_path',
         'version',
-        'is_active'
+        'is_active',
+        'uploaded_at'
     ];
 
     protected $casts =  [

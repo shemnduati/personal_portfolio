@@ -19,7 +19,7 @@ class ProjectImageFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
-            'image_path' => $this->faker->imageUrl(800, 480, 'technics'),
+            'image_path' => 'project_images/'.$this->faker->uuid().'.jpg',
             'caption' => $this->faker->sentence(4),
             'order' => $this->faker->numberBetween(1, 10),
         ];
