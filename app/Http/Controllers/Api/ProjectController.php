@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class ProjectController extends BaseController
 {
@@ -19,8 +20,10 @@ class ProjectController extends BaseController
         $projects = Project::with('projectImages')
                      ->orderBy('project_date', 'desc')
                      ->get();
-        
-        return $this->sendResponse($projects , 'Projects retrieved successfully');
+
+        return Inertia::render('Dashboard/project/index', [
+            'projects' => $projects
+        ]);
     }
 
     /**

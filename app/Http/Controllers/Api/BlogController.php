@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class BlogController extends  BaseController
 {
@@ -20,6 +21,10 @@ class BlogController extends  BaseController
         $blogs = Blog::where('is_published', true)
                    ->orderBy('published_at', 'desc')
                    ->get();
+
+        return Inertia::render('Dashboard/blog/index', [
+            'projects' => $blogs
+        ]);
         
         return $this->sendResponse($blogs, 'Blogs retrieved successfully');
     }
