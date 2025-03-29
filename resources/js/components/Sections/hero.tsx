@@ -3,10 +3,10 @@ import {  Download, FacebookIcon, Github, Linkedin, Twitter } from 'lucide-react
 import { motion } from 'framer-motion';
 
 function hero() {
-    const profilePic = "/assets/me.png";
+    const profilePic = "/assets/meee.png";
   return (
    <>
-    <section id='intro' className='relative py-20 md:py-32 flex itmes-center min-h-screen'>
+    <section id='hero' className='relative py-16 md:py-32 flex itmes-center min-h-screen' >
         <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
             <svg viewBox='0 0 1320 300' className='w-full h-full opacity-10'>
             <motion.text 
@@ -33,7 +33,7 @@ function hero() {
                     transition={{ duration: 0.8 }}
                     >
                     <span className='text-lg md:text-4xl font-bold text-primary mb-2 block'> I am Shem</span>
-                    <h1 className='text-4xl md:text-6xl font-bold text-purple-700  leading-tight mb-4'>
+                    <h1 className='text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-purple-500 to-purple-900 bg-clip-text text-transparent leading-tight mb-4'>
                         Web Software <br className='hidden md:block'/> Developer.
                     </h1>
 

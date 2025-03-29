@@ -60,7 +60,7 @@ function navbar() {
 
                 {/* Hire Me Button*/}
                 <div className='hidden lg:block'>
-                    <Link href="{route('dashboard')}" className='bg-primary font-bold text-white py-3 px-5 rounded-3xl hover:bg-primary-dark transition-colors'>
+                    <Link href="{route('dashboard')}" className='bg-gradient-to-r from-purple-600 to-black font-bold text-white py-3 px-5 rounded-3xl hover:bg-primary-dark transition-colors'>
                         Hire Me!
                     </Link>
                 </div>

@@ -89,20 +89,20 @@ function service() {
                     viewport={{ once: true }}
                     variants={variants}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className={`p-6  rounded-lg cursor-pointer transition-all  duration-300  ${activeService === index ? 'bg-purple-600 text-white shadow-lg' : 'hover:bg-purple-600'}`}
+                    className={`p-6  rounded-lg cursor-pointer transition-all hover:text-white group  duration-300  ${activeService === index ? 'bg-purple-600 text-white shadow-lg' : 'hover:bg-purple-600'}`}
                     onClick={() => setActiveService(index)}
                     style={{ height: itemHeight }}
                 >
-                    <div className="flex flex-col h-full md:flex-row md:items-center">
+                    <div className="flex flex-col h-full md:flex-row md:items-center ">
                         {/* Left Box */}
                         <div className="flex items-center mb-4 md:mb-0 md:w-1/3">
-                            <span className={`text-2xl font-bold mr-4 text-purple-600  ${activeService === index ? ' text-white ' : 'text-purple-600'}`}>0{service.id}</span>
-                            <h3 className={`text-2xl font-bold text-purple-600 ${activeService === index ? ' text-white ' : 'text-purple-600'}`}>{service.title}</h3>
+                            <span className={`text-2xl font-bold mr-4 text-purple-600 group-hover:text-white  ${activeService === index ? ' text-white ' : 'text-purple-600'}`}>0{service.id}</span>
+                            <h3 className={`text-2xl font-bold text-purple-600 group-hover:text-white ${activeService === index ? ' text-white ' : 'text-purple-600'}`}>{service.title}</h3>
                         </div>
 
                         {/* Right Box */}
                         <div className="md:w-2/3">
-                            <p className={` font-semibold ${activeService === index ? ' text-white ' : 'text-gray-700'}`}>{service.description}</p>
+                            <p className={` font-semibold group-hover:text-white ${activeService === index ? ' text-white ' : 'text-gray-700'}`}>{service.description}</p>
                         </div>
 
                         {/* Icon */}
