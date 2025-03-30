@@ -20,7 +20,6 @@ jobs:
 
       - name: Install Dependencies & Build React
         run: |
-          cd frontend
           npm install
           npm run build
 
@@ -33,7 +32,6 @@ jobs:
 
       - name: Install Laravel Dependencies
         run: |
-          cd backend
           composer install --no-dev --prefer-dist
           php artisan config:cache
           php artisan route:cache
