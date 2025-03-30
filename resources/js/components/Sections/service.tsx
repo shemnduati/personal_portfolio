@@ -50,7 +50,7 @@ function service() {
 
   return (
     <>
-     <section id="services-section" className="py-20 bg-gray-100">
+     <section id="services" className="py-20 bg-gray-100">
         <div className="container mx-auto px-4">
             {/* Section Header */}
             <motion.div 

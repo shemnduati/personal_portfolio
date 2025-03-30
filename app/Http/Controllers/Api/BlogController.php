@@ -29,6 +29,18 @@ class BlogController extends  BaseController
         return $this->sendResponse($blogs, 'Blogs retrieved successfully');
     }
 
+
+    public function bloglist()
+    {
+        $blogs = Blog::where('is_published', true)
+                   ->orderBy('published_at', 'desc')
+                   ->get();
+
+        return Inertia::render('blogPage', [
+            'projects' => $blogs
+        ]);
+    } 
+
     public function adminIndex()
     {
         $blogs = Blog::orderBy('created_at','desc')->get();

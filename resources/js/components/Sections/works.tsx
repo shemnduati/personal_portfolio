@@ -64,7 +64,7 @@ function works() {
      
   return (
     <>
-     <section id="work-section" className="py-20 bg-white">
+     <section id="works" className="py-20 bg-white">
         <div className="container mx-auto px-4">
             {/* Section Header */}
             <motion.div
