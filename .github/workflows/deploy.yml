@@ -1,16 +1,15 @@
-name: Deploy Laravel & React to cPanel
+name: Deploy Laravel + React to cPanel
 
 on:
   push:
-    branches:
-      - main  # Change to your deployment branch
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -18,39 +17,71 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies & Build React
+      - name: Install and build React
         run: |
           npm install
           npm run build
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2  # Adjust based on your Laravel setup
-          extensions: mbstring, bcmath, pdo, pdo_mysql
-          tools: composer
-
-      - name: Install Laravel Dependencies
-        run: |
-          composer install --no-dev --prefer-dist
-          php artisan config:cache
-          php artisan route:cache
-
-      - name: Deploy via SSH
+      - name: Deploy React build to root
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USERNAME }}
           key: ${{ secrets.CPANEL_SSH_KEY }}
-          source: "./backend/*, ./frontend/build/*"
-          target: "/home/your_cpanel_user/public_html"
+          source: "public/build/*"
+          target: "/home/${{ secrets.CPANEL_USERNAME }}/public_html"
+          
 
-      - name: Run Migrations
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, pdo, pdo_mysql
+          tools: composer
+
+      - name: Install Laravel dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader
+
+      - name: Deploy Laravel app
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USERNAME }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          source: "./*"
+          target: "/home/${{ secrets.CPANEL_USERNAME }}/public_html/personal_portfolio"
+          strip_components: 0
+          rm: true
+          exclude: |
+            node_modules/
+            .github/
+            .git/
+            .env
+            .vscode/
+            tests/
+           
+
+      - name: Final server setup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USERNAME }}
           key: ${{ secrets.CPANEL_SSH_KEY }}
           script: |
-            cd /home/your_cpanel_user/public_html
+            cd /home/${{ secrets.CPANEL_USERNAME }}/public_html/personal_portfolio
+            
+            # Environment setup
+            [ -f .env ] || cp .env.example .env
+            php artisan key:generate
+            
+            # Permissions
+            chmod -R 755 storage
+            chmod -R 755 bootstrap/cache
+            
+            # Cache optimizations
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # Run migrations
             php artisan migrate --force
