@@ -41,6 +41,15 @@ class BlogController extends  BaseController
         ]);
     } 
 
+    public function blogDetails()
+    {
+        $blog = Blog::where('is_published', true)
+                ->orderBy('published_at', 'desc')
+                ->first();
+
+        return Inertia::render('blogDetails', ['blog' => $blog]);
+    }
+
     public function adminIndex()
     {
         $blogs = Blog::orderBy('created_at','desc')->get();

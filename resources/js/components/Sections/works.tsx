@@ -137,12 +137,14 @@ function works() {
 
                         {/* Portfolio Overlay */}
                         <div className="absolute bottom-0 left-0 w-full m-2 bg-gradient-to-r from-purple-500 to-purple-700 p-4 md:p-6 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between">
-                            <div>
-                            <h3 className="text-white text-xl font-bold mb-2">{item.title}</h3>
-                            <p className="text-white mb-4">{item.description}</p>
-                            </div>
+                            <a href="/blogDetails" >
+                                <h3 className="text-white text-xl font-bold mb-2">{item.title}</h3>
+                                <p className="text-white mb-4">{item.description}</p>
+                            </a>
                             <button className="text-white hover:text-purple-300 transition-colors">
-                                <MoveUpRight className="text-4xl md:text-5xl" />
+                                <a href="/blogDetails" >
+                                  <MoveUpRight className="text-4xl md:text-5xl" />
+                                </a>
                             </button>
                         </div>
                     </motion.div>
