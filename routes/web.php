@@ -42,6 +42,7 @@ Route::get('projects/{project}', [ProjectController::class, 'show']);
 
 // Public blog routes (if enabled)
 Route::get('blogs', [BlogController::class, 'index']);
+Route::get('blogs/create', [BlogController::class, 'create']);
 Route::get('bloglist', [BlogController::class, 'bloglist'])->name('bloglist');
 Route::get('blogDetails', [BlogController::class, 'blogDetails'])->name('blogDetails');
 Route::get('blogs/{blog:slug}', [BlogController::class, 'show']);

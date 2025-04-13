@@ -34,12 +34,21 @@ function hero() {
                     >
                     <span className='text-lg md:text-4xl font-bold text-primary mb-2 block'> I am Shem</span>
                     <h1 className='text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-purple-500 to-purple-900 bg-clip-text text-transparent leading-tight mb-4'>
-                        Web Software <br className='hidden md:block'/> Developer.
+                        Web Software <br className='md:block '/> Developer.
                     </h1>
 
                     {/* Mobile Image - Hide this for the desktop view */}
                     <div className='md:hidden mb-8'>
-                        <img src={profilePic} alt="Shem Nduati" className='rounded-3xl' />
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, rotate: 4.29 }}
+                            animate={{ opacity: 1, y: 0, rotate: 4.29 }}
+                            transition={{ duration: 0.8 }}
+                            className='relative'
+                            whileHover={{ rotate: 0 }}
+                        >
+                            <img src={profilePic} alt="Shem Nduati" className='rounded-4xl mx-auto  w-80 h-80 md:h-110 object-cover border-2 border-white hover:border-purple-600 shadow-2xl' />
+                        </motion.div>
+                        
                     </div>
                     <p className='text-xl text-gray-800 mb-8b max-w-lg'>
                         I break down complex user experience problems to create integrity-focused solutions that

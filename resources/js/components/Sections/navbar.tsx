@@ -170,7 +170,7 @@ function navbar() {
     </header>
     
     {/* Add padding to the top of your main content */}
-    <div className="pt-24 lg:pt-28"></div>
+    <div className="pt-10 lg:pt-28"></div>
   </>
   )
 }

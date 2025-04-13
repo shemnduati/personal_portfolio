@@ -18,11 +18,11 @@ class ProjectController extends BaseController
     public function index()
     {
         $projects = Project::with('projectImages')
-                     ->orderBy('project_date', 'desc')
-                     ->get();
+        ->orderBy('project_date', 'desc')
+        ->get();
 
         return Inertia::render('Dashboard/project/index', [
-            'projects' => $projects
+            'projects' => $projects,
         ]);
     }
 

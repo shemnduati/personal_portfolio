@@ -23,10 +23,15 @@ class BlogController extends  BaseController
                    ->get();
 
         return Inertia::render('Dashboard/blog/index', [
-            'projects' => $blogs
+            'blogs' => $blogs
         ]);
         
         return $this->sendResponse($blogs, 'Blogs retrieved successfully');
+    }
+
+    public function create()
+    {
+        return Inertia::render('Dashboard/blog/create');
     }
 
 

@@ -40,3 +40,21 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+declare interface Project {
+    id: number;
+    name: string;
+    short_description: string;
+    project_date: string;
+    created_at: string;
+    updated_at: string;
+    project_images?: ProjectImage[];
+}
+
+declare interface ProjectImage {
+    id: number;
+    project_id: number;
+    image_path: string;
+    created_at: string;
+    updated_at: string;
+}
