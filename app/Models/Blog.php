@@ -15,12 +15,13 @@ class Blog extends Model
         'excerpt',
         'content',
         'featured_image_path',
-        'publised_at',
+        'published_at',
         'is_published',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
+        'published_at' => 'datetime',
     ];
 
     

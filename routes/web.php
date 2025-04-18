@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
      // Blog routes (if enabled)
      Route::apiResource('blogs', BlogController::class)->except(['index', 'show']);
      Route::get('admin/blogs', [BlogController::class, 'adminIndex']);
+     Route::get('admin/blog', [BlogController::class, 'index'])->name('admin.blog.index');
  
      // Profile routes
      Route::post('upload-profile-photo', [ProfileController::class, 'updateProfilePhoto']);
@@ -34,7 +35,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::post('settings/blog-enabled', [SettingsController::class, 'updateBlogStatus']);
 });
 
-
+Route::middleware(['auth'])->group(function () {
+    // Blog routes
+    Route::get('/admin/blogs', [BlogController::class, 'index'])->name('admin.blogs.index');
+    Route::get('/admin/blogs/create', [BlogController::class, 'create'])->name('admin.blogs.create');
+    Route::post('/admin/blogs', [BlogController::class, 'store'])->name('admin.blogs.store');
+    Route::get('/admin/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('admin.blogs.edit');
+    Route::post('/admin/blogs/{blog}', [BlogController::class, 'update'])->name('admin.blogs.update');
+    Route::delete('/admin/blogs/{blog}', [BlogController::class, 'destroy'])->name('admin.blogs.destroy');
+});
 
 // Public routes
 Route::get('projects', [ProjectController::class, 'index']);
