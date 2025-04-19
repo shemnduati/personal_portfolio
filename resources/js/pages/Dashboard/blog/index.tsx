@@ -16,6 +16,7 @@ import {
   Clock,
   Filter
 } from 'lucide-react';
+import { EyeIcon } from 'lucide-react';
 
 // Define types for our data
 interface Blog {
@@ -29,6 +30,11 @@ interface Blog {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  tags: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
 }
 
 interface PaginatedResponse {
@@ -75,7 +81,6 @@ function BlogIndexContent() {
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>(() => {
     // Ensure we have an array of blogs
     const allBlogs = Array.isArray(blogs?.data) ? blogs.data : [];
-    console.log('Initializing with blogs:', allBlogs.length);
     return allBlogs;
   });
 
@@ -93,7 +98,6 @@ function BlogIndexContent() {
   useEffect(() => {
     // Ensure we're working with a fresh copy of all blogs
     let filtered = Array.isArray(blogs?.data) ? [...blogs.data] : [];
-    console.log('Applying filters to blogs:', filtered.length);
     
     // Apply search filter
     if (searchTerm) {
@@ -128,7 +132,6 @@ function BlogIndexContent() {
       });
     }
     
-    console.log('Filtered blogs count:', filtered.length);
     setFilteredBlogs(filtered);
     setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, columnFilters, blogs?.data]);
@@ -243,6 +246,22 @@ function BlogIndexContent() {
     });
   };
 
+  const renderTags = (tags: Blog['tags']) => {
+    if (!tags || tags.length === 0) return 'No tags';
+    return (
+      <div className="flex flex-wrap gap-1">
+        {tags.map(tag => (
+          <span
+            key={tag.id}
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+          >
+            {tag.name}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Blog Management" />
@@ -317,10 +336,13 @@ function BlogIndexContent() {
                         </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tags
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
-                            </tr>
-                        </thead>
+                    </tr>
+                  </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedBlogs.map((blog) => (
                       <tr key={blog.id} className="hover:bg-gray-50">
@@ -350,14 +372,17 @@ function BlogIndexContent() {
                             {blog.updated_at && `Updated: ${formatDate(blog.updated_at)}`}
                           </div>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {renderTags(blog.tags)}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             <Link 
-                              href={`/admin/blogs/${blog.id}`} 
+                              href={`/admin/blogs/${blog.id}/preview`} 
                               className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
                               title="View"
                             >
-                              <Eye className="w-5 h-5" />
+                              <EyeIcon className="h-5 w-5" />
                             </Link>
                             <Link 
                               href={`/admin/blogs/${blog.id}/edit`} 
@@ -375,12 +400,12 @@ function BlogIndexContent() {
                               <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               {/* Table footer with search and pagination controls */}
               <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200">
@@ -461,10 +486,10 @@ function BlogIndexContent() {
               </div>
             </>
           )}
-            </div>
-            </div>
-        </AppLayout>
-    );
+        </div>
+      </div>
+    </AppLayout>
+  );
 }
 
 export default function BlogIndex() {

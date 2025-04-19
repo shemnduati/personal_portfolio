@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -88,8 +89,11 @@ class BlogController extends Controller
             'content' => 'required',
             'featured_image' => 'sometimes|image|mimes:jpeg,jpg,png,gif|max:2048',
             'is_published' => 'boolean',
+            'meta_title' => 'nullable|string|max:60',
+            'meta_description' => 'nullable|string|max:160',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'nullable|string|json',
         ]);
-
 
         if($validator->fails())
         {
@@ -118,22 +122,33 @@ class BlogController extends Controller
             'slug' => $slug,
             'excerpt' => $input['excerpt'],
             'content' => $input['content'],
+            'meta_title' => $input['meta_title'] ?? null,
+            'meta_description' => $input['meta_description'] ?? null,
             'featured_image_path' => $imagePath,
             'is_published' => $input['is_published'] ?? false,
             'published_at' => $input['is_published']  ? now() : null,
+            'category_id' => $input['category_id'],
         ]);
 
-        // Get the blogs for the index page
-        $blogs = Blog::where('is_published', true)
-                   ->orderBy('published_at', 'desc')
-                   ->get();
+        // Handle tags
+        if (isset($input['tags'])) {
+            $tagNames = json_decode($input['tags'], true);
+            if (is_array($tagNames)) {
+                $tagIds = [];
+                foreach ($tagNames as $tagName) {
+                    $tag = Tag::firstOrCreate(
+                        ['name' => trim($tagName)],
+                        ['slug' => Str::slug(trim($tagName))]
+                    );
+                    $tagIds[] = $tag->id;
+                }
+                $blog->tags()->sync($tagIds);
+            }
+        }
 
-        // Return an Inertia response with the blogs data and a success message
-        return Inertia::render('Dashboard/blog/index', [
-            'blogs' => $blogs,
-            'flash' => [
-                'success' => 'Blog created successfully'
-            ]
+        // Redirect to the blog index page with a success message
+        return redirect()->route('admin.blogs.index')->with('flash', [
+            'success' => 'Blog created successfully'
         ]);
     }
 

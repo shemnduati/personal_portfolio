@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProjectController;
-use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\CategoryController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -19,11 +20,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
      // Projects routes
      Route::apiResource('projects', ProjectController::class);
      Route::post('projects/{project}/images', [ProjectController::class, 'addImage']);
- 
-     // Blog routes (if enabled)
-     Route::apiResource('blogs', BlogController::class)->except(['index', 'show']);
-     Route::get('admin/blogs', [BlogController::class, 'adminIndex']);
-     Route::get('admin/blog', [BlogController::class, 'index'])->name('admin.blog.index');
  
      // Profile routes
      Route::post('upload-profile-photo', [ProfileController::class, 'updateProfilePhoto']);
@@ -43,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('admin.blogs.edit');
     Route::post('/admin/blogs/{blog}', [BlogController::class, 'update'])->name('admin.blogs.update');
     Route::delete('/admin/blogs/{blog}', [BlogController::class, 'destroy'])->name('admin.blogs.destroy');
+    Route::get('/admin/blogs/{blog}/preview', [BlogController::class, 'preview'])->name('blogs.preview');
+    Route::post('/admin/upload-image', [BlogController::class, 'uploadImage'])->name('admin.blogs.upload-image');
+    Route::resource('admin/categories', CategoryController::class)->names('admin.categories');
 });
 
 // Public routes
@@ -55,6 +54,7 @@ Route::get('blogs/create', [BlogController::class, 'create']);
 Route::get('bloglist', [BlogController::class, 'bloglist'])->name('bloglist');
 Route::get('blogDetails', [BlogController::class, 'blogDetails'])->name('blogDetails');
 Route::get('blogs/{blog:slug}', [BlogController::class, 'show']);
+Route::get('api/latest-blogs', [BlogController::class, 'getLatestBlogs'])->name('api.latest-blogs');
 
 // Public CV download
 Route::get('cv/download', [ProfileController::class, 'downloadCv']);

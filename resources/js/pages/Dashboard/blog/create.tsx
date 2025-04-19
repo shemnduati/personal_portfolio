@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import TipTapEditor from '@/components/TipTapEditor';
@@ -11,13 +12,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Eye, Save, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { Calendar, MessageSquare, Minus, Quote, User } from 'lucide-react';
+import { Editor } from '@tinymce/tinymce-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
+        title: 'Dashboard',
+        href: '/dashboard'
+    },
+    {
         title: 'Blog',
         href: '/admin/blogs'
+    },
+    {
+        title: 'Create Blog',
+        href: '/admin/blogs/create'
     }
-]
+];
+
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+interface PageProps {
+    categories: Category[];
+    [key: string]: any;
+}
 
 interface BlogFormData {
     title: string;
@@ -25,11 +48,17 @@ interface BlogFormData {
     image: File | null;
     isPublished: boolean;
     excerpt: string;
+    meta_title: string | null;
+    meta_description: string | null;
+    category_id: string;
+    tags: string[];
 }
 
-export default function CreateBlog() {
+export default function CreateBlog({ categories }: PageProps) {
     const [activeTab, setActiveTab] = useState('edit');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [tagInput, setTagInput] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
     
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
@@ -37,33 +66,72 @@ export default function CreateBlog() {
         excerpt: '',
         featured_image: null as File | null,
         is_published: false as boolean,
+        meta_title: null as string | null,
+        meta_description: null as string | null,
+        category_id: '' as string,
+        tags: [] as string[]
     });
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         
-        // Create FormData for file upload
-        const formData = new FormData();
-        formData.append('title', data.title);
-        formData.append('content', data.content);
-        formData.append('excerpt', data.excerpt);
-        formData.append('is_published', data.is_published.toString());
+        // Create a data object that includes all form fields
+        const submitData = {
+            title: data.title,
+            content: data.content,
+            excerpt: data.excerpt,
+            is_published: Boolean(data.is_published), // Ensure boolean value
+            meta_title: data.meta_title || '',
+            meta_description: data.meta_description || '',
+            category_id: data.category_id,
+            tags: JSON.stringify(tags), // Always stringify tags
+        };
         
+        // If there's a featured image, use FormData
         if (data.featured_image) {
+            const formData = new FormData();
             formData.append('featured_image', data.featured_image);
+            
+            // Add all other fields to FormData
+            Object.entries(submitData).forEach(([key, value]) => {
+                if (key === 'is_published') {
+                    formData.append(key, value ? '1' : '0'); // Convert boolean to string
+                } else {
+                    formData.append(key, value.toString());
+                }
+            });
+            
+            // Debug the FormData
+            console.log('Submitting with FormData:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Use Inertia's post method with FormData
+            router.post('/admin/blogs', formData, {
+                onSuccess: () => {
+                    toast.success('Blog post created successfully!');
+                },
+                onError: (errors) => {
+                    toast.error('Failed to create blog post. Please check the form for errors.');
+                    console.error('Form submission errors:', errors);
+                }
+            });
+        } else {
+            // Debug the regular form data
+            console.log('Submitting with regular data:', submitData);
+            
+            // Use Inertia's post method with regular data
+            router.post('/admin/blogs', submitData, {
+                onSuccess: () => {
+                    toast.success('Blog post created successfully!');
+                },
+                onError: (errors) => {
+                    toast.error('Failed to create blog post. Please check the form for errors.');
+                    console.error('Form submission errors:', errors);
+                }
+            });
         }
-        
-        post('/blogs', {
-            onSuccess: () => {
-                toast.success('Blog post created successfully!');
-                // Redirect to blog index page
-                router.visit('/admin/blogs');
-            },
-            onError: () => {
-                toast.error('Failed to create blog post. Please check your inputs.');
-            },
-            preserveScroll: true,
-        });
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +150,26 @@ export default function CreateBlog() {
 
     const togglePublish = () => {
         setData('is_published', !data.is_published);
+    };
+
+    const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && tagInput.trim()) {
+            e.preventDefault();
+            console.log('Adding tag:', tagInput.trim());
+            if (!tags.includes(tagInput.trim())) {
+                const newTags = [...tags, tagInput.trim()];
+                console.log('Updated tags:', newTags);
+                setTags(newTags);
+            }
+            setTagInput('');
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        console.log('Removing tag:', tagToRemove);
+        const newTags = tags.filter(tag => tag !== tagToRemove);
+        console.log('Updated tags after removal:', newTags);
+        setTags(newTags);
     };
 
     return (
@@ -118,6 +206,28 @@ export default function CreateBlog() {
                                         />
                                         {errors.title && (
                                             <p className="text-sm text-red-500">{errors.title}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="category">Category</Label>
+                                        <Select
+                                            value={data.category_id}
+                                            onValueChange={(value) => setData('category_id', value)}
+                                        >
+                                            <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
+                                                <SelectValue placeholder="Select a category" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {categories.map((category) => (
+                                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                                        {category.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.category_id && (
+                                            <p className="text-sm text-red-500">{errors.category_id}</p>
                                         )}
                                     </div>
 
@@ -219,20 +329,67 @@ export default function CreateBlog() {
                                                 <Input
                                                     id="meta-title"
                                                     type="text"
+                                                    value={data.meta_title || ''}
+                                                    onChange={(e) => setData('meta_title', e.target.value)}
                                                     placeholder="SEO title (optional)"
+                                                    maxLength={60}
                                                 />
+                                                <p className="text-xs text-gray-500">
+                                                    {data.meta_title ? `${data.meta_title.length}/60 characters` : '0/60 characters'}
+                                                </p>
                                             </div>
                                             <div className="space-y-1">
                                                 <Label htmlFor="meta-description" className="text-sm">Meta Description</Label>
                                                 <Input
                                                     id="meta-description"
                                                     type="text"
+                                                    value={data.meta_description || ''}
+                                                    onChange={(e) => setData('meta_description', e.target.value)}
                                                     placeholder="SEO description (optional)"
+                                                    maxLength={160}
                                                 />
+                                                <p className="text-xs text-gray-500">
+                                                    {data.meta_description ? `${data.meta_description.length}/160 characters` : '0/160 characters'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Tags Section */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Tags
+                                </label>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {tags.map((tag, index) => (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+                                        >
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeTag(tag)}
+                                                className="ml-2 text-purple-600 hover:text-purple-800"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <input
+                                    type="text"
+                                    value={tagInput}
+                                    onChange={(e) => setTagInput(e.target.value)}
+                                    onKeyDown={handleTagInputKeyDown}
+                                    placeholder="Type a tag and press Enter"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
+                                />
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Press Enter to add a tag
+                                </p>
                             </div>
 
                             <CardFooter className="flex justify-end space-x-2 pt-6">
@@ -241,14 +398,17 @@ export default function CreateBlog() {
                                     variant="outline"
                                     onClick={() => {
                                         setData('is_published', false);
-                                        post('/blogs', {
+                                        router.post('/admin/blogs', {
+                                            ...data,
+                                            tags: JSON.stringify(tags)
+                                        }, {
                                             onSuccess: () => {
                                                 toast.success('Blog post saved as draft!');
-                                                // Redirect to blog index page
                                                 router.visit('/admin/blogs');
                                             },
-                                            onError: () => {
-                                                toast.error('Failed to save blog post as draft. Please try again.');
+                                            onError: (errors) => {
+                                                toast.error('Failed to save blog post as draft.');
+                                                console.error('Form submission errors:', errors);
                                             },
                                         });
                                     }}

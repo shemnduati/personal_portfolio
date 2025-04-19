@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, LibraryBig, NotebookText, ServerCog } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, LibraryBig, NotebookText, ServerCog, Tags } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -20,8 +20,13 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Blogs',
-        href: '/blogs',
+        href: '/admin/blogs',
         icon: LibraryBig,
+    },
+    {
+        title: 'Categories',
+        href: '/admin/categories',
+        icon: Tags,
     },
 ];
 

@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -17,10 +17,8 @@ import {
   Image as ImageIcon,
   Heading1,
   Heading2,
-  Quote,
-  Code,
-  Undo,
-  Redo
+  Heading3,
+  Type
 } from 'lucide-react';
 import '@/css/tiptap.css';
 
@@ -30,23 +28,23 @@ interface TipTapEditorProps {
   placeholder?: string;
 }
 
-const TipTapEditor: React.FC<TipTapEditorProps> = ({ 
-  content, 
-  onChange,
-  placeholder = 'Start writing your content here...'
-}) => {
+export default function TipTapEditor({ content, onChange, placeholder }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Image,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto',
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-blue-500 underline',
         },
       }),
-      Placeholder.configure({
-        placeholder,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
       }),
     ],
     content,
@@ -55,168 +53,183 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
     },
   });
 
-  if (!editor) {
-    return null;
-  }
-
   const addImage = () => {
-    const url = window.prompt('Enter image URL');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = async () => {
+      if (input.files?.length) {
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+          const response = await fetch('/admin/upload-image', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            editor?.chain().focus().setImage({ src: data.url }).run();
+          } else {
+            console.error('Failed to upload image');
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+        }
+      }
+    };
+    
+    input.click();
   };
 
   const addLink = () => {
     const url = window.prompt('Enter URL');
     if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
+      editor?.chain().focus().setLink({ href: url }).run();
     }
   };
 
+  if (!editor) {
+    return null;
+  }
+
   return (
-    <div className="border rounded-md overflow-hidden">
+    <div className="border rounded-md">
       <div className="tiptap-toolbar">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={editor.isActive('bold') ? 'is-active' : ''}
           title="Bold"
         >
-          <Bold size={16} />
+          <Bold className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           className={editor.isActive('italic') ? 'is-active' : ''}
           title="Italic"
         >
-          <Italic size={16} />
+          <Italic className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          className={editor.isActive('paragraph') ? 'is-active' : ''}
+          title="Paragraph"
+        >
+          <Type className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
           title="Heading 1"
         >
-          <Heading1 size={16} />
+          <Heading1 className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
           title="Heading 2"
         >
-          <Heading2 size={16} />
+          <Heading2 className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
+          title="Heading 3"
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={editor.isActive('bulletList') ? 'is-active' : ''}
           title="Bullet List"
         >
-          <List size={16} />
+          <List className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={editor.isActive('orderedList') ? 'is-active' : ''}
-          title="Ordered List"
+          title="Numbered List"
         >
-          <ListOrdered size={16} />
+          <ListOrdered className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={addImage}
+          title="Add Image"
+        >
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
           className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
           title="Align Left"
         >
-          <AlignLeft size={16} />
+          <AlignLeft className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
           className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
           title="Align Center"
         >
-          <AlignCenter size={16} />
+          <AlignCenter className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
           className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
           title="Align Right"
         >
-          <AlignRight size={16} />
+          <AlignRight className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={addLink}
           className={editor.isActive('link') ? 'is-active' : ''}
           title="Add Link"
         >
-          <LinkIcon size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={addImage}
-          title="Add Image"
-        >
-          <ImageIcon size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive('blockquote') ? 'is-active' : ''}
-          title="Blockquote"
-        >
-          <Quote size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={editor.isActive('codeBlock') ? 'is-active' : ''}
-          title="Code Block"
-        >
-          <Code size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          title="Undo"
-        >
-          <Undo size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          title="Redo"
-        >
-          <Redo size={16} />
+          <LinkIcon className="h-4 w-4" />
         </Button>
       </div>
-      <EditorContent 
-        editor={editor} 
-        className="ProseMirror"
-      />
+      <EditorContent editor={editor} className="ProseMirror" />
     </div>
   );
-};
-
-export default TipTapEditor; 
+} 
