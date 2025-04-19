@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/Sections/navbar';
 import Header from '@/components/Sections/navbarPages';
 import Footer from '@/components/Sections/footer';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, CalendarDays, FacebookIcon, LinkedinIcon, MessageSquare, Minus, MoveLeft, MoveRight, Quote, Search, TwitchIcon, User } from 'lucide-react';
 
@@ -55,7 +55,9 @@ interface PageProps {
 }
 
 function BlogDetails() {
-  const { blog, recentBlogs, categories, previousBlog, nextBlog, popularTags = [] } = usePage<PageProps>().props;
+  const { blog, recentBlogs, categories, previousBlog, nextBlog, popularTags = [], flash } = usePage<PageProps>().props;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Format date for display
   const formatDate = (dateString: string | null) => {
@@ -91,6 +93,32 @@ function BlogDetails() {
   const bg = "/assets/blog-bg.jpeg";
   const blog1 = "/assets/blog-2.webp";
   const blog2 = "/assets/blog-1.webp";
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSearching(true);
+    
+    // Build the URL with search parameter
+    let url = '/bloglist';
+    const params = new URLSearchParams();
+    
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+    
+    router.visit(url, {
+      preserveState: true,
+      preserveScroll: true,
+      onFinish: () => {
+        setIsSearching(false);
+      }
+    });
+  };
 
   return (
     <>
@@ -290,16 +318,22 @@ function BlogDetails() {
             <div className="lg:w-4/12">
               {/* Search Widget*/}
               <div className="bg-purple-50 shadow-md rounded-lg p-4 mb-6">
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                   <input
                     type="text"
                     placeholder="Search..."
                     className="w-full px-3 py-2 outline-none"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button className="bg-purple-600 text-white px-4 py-2">
+                  <button 
+                    type="submit" 
+                    className="bg-purple-600 text-white px-4 py-2 hover:bg-purple-700 transition-colors"
+                    disabled={isSearching}
+                  >
                     <Search />
                   </button>
-                </div>
+                </form>
               </div>
 
               {/* Categories Widget */}

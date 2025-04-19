@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProjectController as ApiProjectController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TechnologyController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -17,9 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-     // Projects routes
-     Route::apiResource('projects', ProjectController::class);
-     Route::post('projects/{project}/images', [ProjectController::class, 'addImage']);
+     // Projects API routes
+     Route::apiResource('api/projects', ApiProjectController::class);
+     Route::post('api/projects/{project}/images', [ApiProjectController::class, 'addImage']);
  
      // Profile routes
      Route::post('upload-profile-photo', [ProfileController::class, 'updateProfilePhoto']);
@@ -29,6 +31,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
      // Settings routes
      Route::get('settings', [SettingsController::class, 'getSettings']);
      Route::post('settings/blog-enabled', [SettingsController::class, 'updateBlogStatus']);
+
+     // Projects web routes
+     Route::get('/admin/projects', [ProjectController::class, 'index'])->name('projects.index');
+     Route::get('/admin/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+     Route::post('/admin/projects', [ProjectController::class, 'store'])->name('projects.store');
+     Route::get('/admin/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+     Route::post('/admin/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+     Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+     Route::post('/admin/upload-image', [ProjectController::class, 'uploadImage'])->name('projects.upload-image');
+
+     // Technologies web routes
+     Route::get('/admin/technologies', [TechnologyController::class, 'index'])->name('technologies.index');
+     Route::get('/admin/technologies/create', [TechnologyController::class, 'create'])->name('technologies.create');
+     Route::post('/admin/technologies', [TechnologyController::class, 'store'])->name('technologies.store');
+     Route::get('/admin/technologies/{technology}/edit', [TechnologyController::class, 'edit'])->name('technologies.edit');
+     Route::post('/admin/technologies/{technology}', [TechnologyController::class, 'update'])->name('technologies.update');
+     Route::delete('/admin/technologies/{technology}', [TechnologyController::class, 'destroy'])->name('technologies.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Sections/navbar';
+import Header from '@/components/Sections/navbarPages';
 import Footer from '@/components/Sections/footer';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { ArrowRight, Calendar, CalendarDays, MessageSquare, Minus, MoveLeft, MoveRight, Quote, Search, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -49,11 +50,12 @@ interface PageProps {
   currentCategory: string | null;
   currentTag: string | null;
   popularTags: Tag[];
+  searchQuery: string | null;
   [key: string]: any;
 }
 
 function BlogPage() {
-  const { blogs, categories, currentCategory, currentTag, popularTags } = usePage<PageProps>().props;
+  const { blogs, categories, currentCategory, currentTag, popularTags, searchQuery } = usePage<PageProps>().props;
   
   const bg = "/assets/blog-bg.jpeg";
   const blog1 = "/assets/blog-2.webp";
@@ -94,6 +96,8 @@ function BlogPage() {
   const recentBlogs = blogs.slice(0, 2);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(searchQuery || '');
+  const [isSearching, setIsSearching] = useState(false);
   const postsPerpage = 2;
   const totalPages = Math.ceil(blogs.length / postsPerpage);
 
@@ -105,6 +109,40 @@ function BlogPage() {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSearching(true);
+    
+    // Build the URL with search parameter
+    let url = '/bloglist';
+    const params = new URLSearchParams();
+    
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+    
+    if (currentCategory) {
+      params.append('category', currentCategory);
+    }
+    
+    if (currentTag) {
+      params.append('tag', currentTag);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+    
+    router.visit(url, {
+      preserveState: true,
+      preserveScroll: true,
+      onFinish: () => {
+        setIsSearching(false);
+      }
+    });
+  };
+
   return (
     <>
       <Navbar />
@@ -113,59 +151,16 @@ function BlogPage() {
         className="breadcrumb_area relative py-24 md:py-32 lg:py-40 bg-cover bg-center bg-no-repeat flex items-center justify-center text-center"
         style={{ backgroundImage: `url(${bg})` }}
       >
-        {/* Purple Transparent Overlay */}
-        <div
+         <div
           className="absolute inset-0"
-          style={{ backgroundColor: 'rgb(149, 0, 149, 0.8)' }}
+          style={{ backgroundColor: 'rgb(149, 0, 149, 0.8)' }} // Purple with 50% opacity
         ></div>
-
-        {/* Centered Content */}
-        <div className="relative z-10">
-          {/* Page Title */}
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
-          >
-            {currentCategory 
-              ? `Category: ${categories.find(c => c.slug === currentCategory)?.name}` 
-              : currentTag 
-                ? `Tag: ${popularTags.find(t => t.slug === currentTag)?.name}` 
-                : 'Blog'}
-          </motion.h2>
-
-          {/* Breadcrumb Navigation */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="flex items-center justify-center text-white space-x-2"
-          >
-            <Link href="/" className="hover:text-purple-300 transition-colors">
-              Home
-            </Link>
-            <ArrowRight />
-            <Link href="/bloglist" className="hover:text-purple-300 transition-colors">
-              Blog
-            </Link>
-            {currentCategory && (
-              <>
-                <ArrowRight />
-                <span className="text-purple-300">
-                  {categories.find(c => c.slug === currentCategory)?.name}
-                </span>
-              </>
-            )}
-            {currentTag && !currentCategory && (
-              <>
-                <ArrowRight />
-                <span className="text-purple-300">
-                  {popularTags.find(t => t.slug === currentTag)?.name}
-                </span>
-              </>
-            )}
-          </motion.div>
+        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="relative z-10 text-white">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Blog</h1>
+          <p className="text-lg md:text-xl max-w-2xl mx-auto">
+            Explore our latest articles, insights, and updates
+          </p>
         </div>
       </section>
       <section className="py-16 md:py-20 lg:py-24">
@@ -294,16 +289,22 @@ function BlogPage() {
             <div className="lg:w-4/12">
               {/* Search Widget*/}
               <div className="bg-purple-50 shadow-md rounded-lg p-4 mb-6">
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                   <input
                     type="text"
                     placeholder="Search..."
                     className="w-full px-3 py-2 outline-none"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button className="bg-purple-600 text-white px-4 py-2">
+                  <button 
+                    type="submit" 
+                    className="bg-purple-600 text-white px-4 py-2 hover:bg-purple-700 transition-colors"
+                    disabled={isSearching}
+                  >
                     <Search />
                   </button>
-                </div>
+                </form>
               </div>
 
               {/* Categories Widget */}

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
@@ -12,13 +13,39 @@ class Project extends Model
     protected $fillable = [
         'title',
         'slug',
-        'short_description',
-        'full_description',
+        'description',
+        'content',
         'featured_image_path',
-        'project_table',
+        'github_url',
+        'live_url',
         'is_featured',
-        'project_date'
     ];
+
+    protected $casts = [
+        'is_featured' => 'boolean',
+    ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($project) {
+            if (!$project->slug) {
+                $project->slug = Str::slug($project->title);
+            }
+        });
+
+        static::updating(function ($project) {
+            if ($project->isDirty('title') && !$project->isDirty('slug')) {
+                $project->slug = Str::slug($project->title);
+            }
+        });
+    }
+
+    public function technologies()
+    {
+        return $this->belongsToMany(Technology::class);
+    }
 
     public function projectImages()
     {

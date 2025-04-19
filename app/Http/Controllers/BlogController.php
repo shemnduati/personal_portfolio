@@ -61,6 +61,19 @@ class BlogController extends Controller
             });
         }
 
+        // Filter by search query if provided
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('content', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('excerpt', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('tags', function($q) use ($searchTerm) {
+                      $q->where('name', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
+
         $blogs = $query->with(['category', 'tags'])->get();
 
         // Get categories with blog counts
@@ -84,7 +97,8 @@ class BlogController extends Controller
             'categories' => $categories,
             'currentCategory' => $request->category,
             'currentTag' => $request->tag,
-            'popularTags' => $popularTags
+            'popularTags' => $popularTags,
+            'searchQuery' => $request->search ?? ''
         ]);
     } 
 
