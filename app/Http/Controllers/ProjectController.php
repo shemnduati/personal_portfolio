@@ -106,6 +106,15 @@ class ProjectController extends Controller
             ->with('success', 'Project updated successfully.');
     }
 
+    public function show(Project $project)
+    {
+        $project->load(['technologies', 'category']);
+        
+        return Inertia::render('project/[id]', [
+            'project' => $project
+        ]);
+    }
+
     public function destroy(Project $project)
     {
         $project->delete();

@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\ProjectController as ApiProjectController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TechnologyController;
 use Inertia\Inertia;
@@ -47,6 +47,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::get('/admin/technologies/{technology}/edit', [TechnologyController::class, 'edit'])->name('technologies.edit');
      Route::post('/admin/technologies/{technology}', [TechnologyController::class, 'update'])->name('technologies.update');
      Route::delete('/admin/technologies/{technology}', [TechnologyController::class, 'destroy'])->name('technologies.destroy');
+
+    // Settings routes
+    Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings.index');
+    Route::post('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+    Route::post('/admin/settings/upload-cv', [SettingsController::class, 'uploadCV'])->name('admin.settings.upload-cv');
+    Route::get('/admin/settings/download-cv', [SettingsController::class, 'downloadCV'])->name('admin.settings.download-cv');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -65,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
 // Public routes
 Route::get('api/featured-projects', [ApiProjectController::class, 'getFeaturedProjects']);
 Route::get('projects', [ProjectController::class, 'index']);
-Route::get('projects/{project}', [ProjectController::class, 'show']);
+Route::get('projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
 
 // Public blog routes (if enabled)
 Route::get('blogs', [BlogController::class, 'index']);
@@ -74,9 +80,6 @@ Route::get('bloglist', [BlogController::class, 'bloglist'])->name('bloglist');
 Route::get('blogDetails', [BlogController::class, 'blogDetails'])->name('blogDetails');
 Route::get('blogs/{blog:slug}', [BlogController::class, 'show']);
 Route::get('api/latest-blogs', [BlogController::class, 'getLatestBlogs'])->name('api.latest-blogs');
-
-// Public CV download
-Route::get('cv/download', [ProfileController::class, 'downloadCv']);
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

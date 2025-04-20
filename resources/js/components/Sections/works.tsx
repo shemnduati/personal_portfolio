@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MoveUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { Link } from '@inertiajs/react';
 
 interface Project {
     id: number;
@@ -16,6 +17,7 @@ interface Project {
         name: string;
         slug: string;
     };
+    slug: string;
 }
 
 interface Category {
@@ -55,8 +57,8 @@ function Works() {
     // Predefined filters to ensure specific order and all necessary categories
     const predefinedFilters = [
         { name: "All", value: "all" },
-        { name: "UI/UX", value: "ui-ux" },
-        { name: "Web Development", value: "web-development" },
+        { name: "UI/UX", value: "ui-ux-design" },
+        { name: "Web Apps", value: "web-development" },
         { name: "Mobile Apps", value: "mobile-apps" }
     ];
 
@@ -169,44 +171,40 @@ function Works() {
                                 transition={{ duration: 0.5 }}
                                 className='relative group overflow-hidden rounded-xl shadow-lg'
                             >
-                                {/* Project Image */}
-                                <div className="h-80 overflow-hidden">
-                                    <img 
-                                        src={getImageUrl(project.featured_image_path)} 
-                                        alt={project.title} 
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                                    />
-                                </div>
+                                <Link href={`/projects/${project.slug}`}>
+                                    {/* Project Image */}
+                                    <div className="h-80 overflow-hidden">
+                                        <img 
+                                            src={getImageUrl(project.featured_image_path)} 
+                                            alt={project.title} 
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                        />
+                                    </div>
 
-                                {/* Project Overlay */}
-                                <div className="absolute bottom-0 left-0 w-full m-2 bg-gradient-to-r from-purple-500 to-purple-700 p-4 md:p-6 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-white text-xl font-bold mb-2">{project.title}</h3>
-                                        <p className="text-white mb-4">{project.description}</p>
-                                        <div className="flex gap-4">
-                                            {project.github_url && (
-                                                <a 
-                                                    href={project.github_url} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-white hover:text-purple-200 transition-colors text-sm flex items-center gap-1"
-                                                >
-                                                    GitHub <MoveUpRight size={16} />
-                                                </a>
-                                            )}
-                                            {project.live_url && (
-                                                <a 
-                                                    href={project.live_url} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-white hover:text-purple-200 transition-colors text-sm flex items-center gap-1"
-                                                >
-                                                    Live Demo <MoveUpRight size={16} />
-                                                </a>
-                                            )}
+                                    {/* Project Overlay */}
+                                    <div className="absolute bottom-0 left-0 w-full m-2 bg-gradient-to-r from-purple-500 to-purple-700 p-4 md:p-6 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div>
+                                            <h3 className="text-white text-xl font-bold mb-2">{project.title}</h3>
+                                            <p className="text-white mb-4">{project.description}</p>
+                                            <div className="flex gap-4">
+                                                {project.github_url && (
+                                                    <span 
+                                                        className="text-white hover:text-purple-200 transition-colors text-sm flex items-center gap-1"
+                                                    >
+                                                        GitHub <MoveUpRight size={16} />
+                                                    </span>
+                                                )}
+                                                {project.live_url && (
+                                                    <span 
+                                                        className="text-white hover:text-purple-200 transition-colors text-sm flex items-center gap-1"
+                                                    >
+                                                        Live Demo <MoveUpRight size={16} />
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             </motion.div>
                         ))
                     )}
