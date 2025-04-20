@@ -1,9 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, MapPin, PhoneCall } from 'lucide-react';
+import { toast } from 'sonner';
 
-function contact() {
+function Contact() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <>
     <section className="bg-gray-100 py-16 lg:px-20" id="contact">
         <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
@@ -11,22 +61,58 @@ function contact() {
                 <div className="bg-white p-8 rounded-xl shadow-md">
                     <h2 className="text-3xl md:text-4xl font-bold text-purple-700 mb-4">Let's work together!</h2>
                     <p className="text-gray-600 mb-6">I design and code beautifully simple things and I love what I do.</p>
-                    <form>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <input type="text" placeholder="First Name" className="border p-3 rounded-md" />
-                            <input type="text" placeholder="Last Name" className="border p-3 rounded-md" />
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                placeholder="Your Name"
+                                className="w-full border p-3 rounded-md"
+                                required
+                            />
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            <input type="email" placeholder="Email Address" className="border p-3 rounded-md" />
-                            <input type="tel" placeholder="Phone Number" className="border p-3 rounded-md" />
+                        <div className="mb-4">
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="Your Email"
+                                className="w-full border p-3 rounded-md"
+                                required
+                            />
                         </div>
-                        <select className="w-full border p-3 rounded-md mt-4">
-                            <option>Choose Service</option>
-                            <option>Web Development</option>
-                            <option>UI/UX Design</option>
-                        </select>
-                        <textarea placeholder="Message" className="w-full border p-3 rounded-md mt-4" rows="4"></textarea>
-                        <button className="bg-gradient-to-r from-purple-600 to-black text-white font-semibold py-3 mt-4 rounded-3xl lg:w-1/4 sm:w-1/2 px-4 md:col-span-2 hover:opacity-90 transition">Send Message</button>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                name="subject"
+                                value={formData.subject}
+                                onChange={handleChange}
+                                placeholder="Subject"
+                                className="w-full border p-3 rounded-md"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
+                                placeholder="Your Message"
+                                className="w-full border p-3 rounded-md"
+                                rows={4}
+                                required
+                            ></textarea>
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="bg-gradient-to-r from-purple-600 to-black text-white font-semibold py-3 rounded-3xl w-full md:w-auto px-8 hover:opacity-90 transition disabled:opacity-50"
+                        >
+                            {isSubmitting ? 'Sending...' : 'Send Message'}
+                        </button>
                     </form>
                 </div>
 
@@ -67,8 +153,7 @@ function contact() {
             </div>
         </div>
     </section>
-    </>
-  )
+  );
 }
 
-export default contact
+export default Contact;

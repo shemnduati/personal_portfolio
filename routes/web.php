@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TechnologyController;
 use Inertia\Inertia;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ContactController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -53,6 +54,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
     Route::post('/admin/settings/upload-cv', [SettingsController::class, 'uploadCV'])->name('admin.settings.upload-cv');
     Route::get('/admin/settings/download-cv', [SettingsController::class, 'downloadCV'])->name('admin.settings.download-cv');
+
+    // Contact submissions routes
+    Route::get('/admin/messages', [ContactController::class, 'index'])->name('admin.messages.index');
+    Route::post('/admin/messages/{submission}/mark-as-read', [ContactController::class, 'markAsRead'])->name('admin.messages.mark-as-read');
+    Route::delete('/admin/messages/{submission}', [ContactController::class, 'destroy'])->name('admin.messages.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -80,6 +86,9 @@ Route::get('bloglist', [BlogController::class, 'bloglist'])->name('bloglist');
 Route::get('blogDetails', [BlogController::class, 'blogDetails'])->name('blogDetails');
 Route::get('blogs/{blog:slug}', [BlogController::class, 'show']);
 Route::get('api/latest-blogs', [BlogController::class, 'getLatestBlogs'])->name('api.latest-blogs');
+
+// Add this route outside the auth middleware group for public access
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
