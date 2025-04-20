@@ -25,14 +25,14 @@ function experience() {
     ];
     const education = [
         {
-            id: 1,
+            id: 3,
             year: "2018 to 2022",
             title: "Bachelor of Science in Computer Science",
             school: "University of California, Los Angeles",
             experience: " Completed coursework in data structures, algorithms, computer systems, and software engineering.",
         },
         {
-            id: 1,
+            id: 4,
             year: "2014 to 2018",
             title: "Bachelor of Mathematics",
             school: "University of London, UK",

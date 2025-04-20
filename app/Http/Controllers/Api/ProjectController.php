@@ -165,4 +165,14 @@ class ProjectController extends BaseController
 
         return $this->sendResponse($image, 'Image added successfully.');
     }
+
+    public function getFeaturedProjects()
+    {
+        $projects = Project::with('category')
+            ->where('is_featured', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($projects);
+    }
 }

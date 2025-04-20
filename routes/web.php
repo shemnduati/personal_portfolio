@@ -9,10 +9,9 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TechnologyController;
 use Inertia\Inertia;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return Inertia::render('home');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -35,11 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
      // Projects web routes
      Route::get('/admin/projects', [ProjectController::class, 'index'])->name('projects.index');
      Route::get('/admin/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+     Route::post('/admin/projects/upload-image', [ProjectController::class, 'uploadImage'])->name('projects.upload-image');
      Route::post('/admin/projects', [ProjectController::class, 'store'])->name('projects.store');
      Route::get('/admin/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
      Route::post('/admin/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
      Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
-     Route::post('/admin/upload-image', [ProjectController::class, 'uploadImage'])->name('projects.upload-image');
 
      // Technologies web routes
      Route::get('/admin/technologies', [TechnologyController::class, 'index'])->name('technologies.index');
@@ -64,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Public routes
+Route::get('api/featured-projects', [ApiProjectController::class, 'getFeaturedProjects']);
 Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 

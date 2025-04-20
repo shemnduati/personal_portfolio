@@ -19,6 +19,7 @@ class Project extends Model
         'github_url',
         'live_url',
         'is_featured',
+        'category_id',
     ];
 
     protected $casts = [
@@ -50,5 +51,10 @@ class Project extends Model
     public function projectImages()
     {
         return $this->hasMany(ProjectImage::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ProjectCategory::class, 'category_id');
     }
 }

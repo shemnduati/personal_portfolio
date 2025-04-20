@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Link, router } from '@inertiajs/react';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
-import { TechnologySelect } from '@/components/ui/technology-select';
+import { ArrowLeft, X, Check, Search } from 'lucide-react';
 
 // Define types for our data
 interface Technology {
@@ -42,21 +41,48 @@ interface PageProps {
   categories: Category[];
 }
 
-export default function ProjectEdit({ project, technologies, categories }: PageProps) {
+export default function ProjectEdit({ project, technologies = [], categories = [] }: PageProps) {
   const [formData, setFormData] = useState({
-    title: project.title,
-    description: project.description,
-    content: project.content,
-    featured_image_path: project.featured_image_path,
-    github_url: project.github_url,
-    live_url: project.live_url,
-    is_featured: project.is_featured,
-    technologies: project.technologies.map(tech => tech.id),
+    title: project.title || '',
+    description: project.description || '',
+    content: project.content || '',
+    featured_image_path: project.featured_image_path || '',
+    github_url: project.github_url || '',
+    live_url: project.live_url || '',
+    is_featured: project.is_featured || false,
+    technologies: project.technologies?.map(tech => tech.id) || [],
     category_id: project.category_id?.toString() || '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(project.featured_image_path ? `/storage/${project.featured_image_path}` : null);
+  const [isTechDropdownOpen, setIsTechDropdownOpen] = useState(false);
+  const [techSearch, setTechSearch] = useState('');
+  const techDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Function to get the full image URL
+  const getImageUrl = (path: string) => {
+    if (!path) return null;
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `/storage/${path}`;
+  };
+
+  // Filter technologies based on search
+  const filteredTechnologies = technologies.filter(tech =>
+    tech.name.toLowerCase().includes(techSearch.toLowerCase())
+  );
+
+  // Handle click outside to close tech dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (techDropdownRef.current && !techDropdownRef.current.contains(event.target as Node)) {
+        setIsTechDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -84,11 +110,19 @@ export default function ProjectEdit({ project, technologies, categories }: PageP
     }
   };
 
-  const handleTechnologyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+  const toggleTechnology = (techId: number) => {
     setFormData(prev => ({
       ...prev,
-      technologies: selectedOptions
+      technologies: prev.technologies.includes(techId)
+        ? prev.technologies.filter(id => id !== techId)
+        : [...prev.technologies, techId]
+    }));
+  };
+
+  const removeTechnology = (techId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      technologies: prev.technologies.filter(id => id !== techId)
     }));
   };
 
@@ -109,30 +143,78 @@ export default function ProjectEdit({ project, technologies, categories }: PageP
 
     setIsSubmitting(true);
     
-    fetch('/admin/upload-image', {
+    // Get CSRF token from the meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    if (!csrfToken) {
+      toast.error('CSRF token not found. Please refresh the page.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Log the request details
+    console.log('Starting image upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      csrfToken: csrfToken ? 'Present' : 'Missing'
+    });
+
+    fetch('/admin/projects/upload-image', {
       method: 'POST',
       body: formData,
       headers: {
+        'X-CSRF-TOKEN': csrfToken,
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
       },
     })
-      .then(response => response.json())
+      .then(async response => {
+        const responseText = await response.text();
+        console.log('Server response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: responseText
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status} ${responseText}`);
+        }
+
+        // Try to parse the response as JSON
+        try {
+          const data = JSON.parse(responseText);
+          // Handle both response formats (project and blog)
+          if (data.url) {
+            // Convert blog format to project format
+            return {
+              success: true,
+              image_path: data.url.replace('/storage/', '')
+            };
+          }
+          return data;
+        } catch (e) {
+          console.error('Failed to parse response as JSON:', responseText);
+          throw new Error('Invalid server response format');
+        }
+      })
       .then(data => {
         if (data.success) {
+          console.log('Upload successful:', data);
           setFormData(prev => ({
             ...prev,
             featured_image_path: data.image_path
           }));
+          setImagePreview(getImageUrl(data.image_path));
           toast.success('Image uploaded successfully');
         } else {
+          console.error('Upload failed:', data);
           toast.error(data.message || 'Failed to upload image');
         }
         setIsSubmitting(false);
       })
       .catch(error => {
         console.error('Error uploading image:', error);
-        toast.error('Failed to upload image');
+        toast.error(`Failed to upload image: ${error.message}`);
         setIsSubmitting(false);
       });
   };
@@ -212,13 +294,13 @@ export default function ProjectEdit({ project, technologies, categories }: PageP
             </div>
 
             <div>
-              <Label htmlFor="category_id">Category</Label>
+              <Label htmlFor="category_id">Project Category</Label>
               <select
                 id="category_id"
                 name="category_id"
                 value={formData.category_id}
                 onChange={handleInputChange}
-                className={`w-full rounded-md border ${errors.category_id ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-indigo-500 focus:ring-indigo-500`}
+                className={`w-full rounded-md border ${errors.category_id ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2`}
               >
                 <option value="">Select a category</option>
                 {categories.map((category) => (
@@ -232,53 +314,106 @@ export default function ProjectEdit({ project, technologies, categories }: PageP
               )}
             </div>
 
-            <TechnologySelect
-              technologies={technologies}
-              selectedTechnologies={formData.technologies}
-              onChange={(selectedIds) => {
-                setFormData(prev => ({
-                  ...prev,
-                  technologies: selectedIds
-                }));
-                if (errors.technologies) {
-                  setErrors(prev => {
-                    const newErrors = { ...prev };
-                    delete newErrors.technologies;
-                    return newErrors;
-                  });
-                }
-              }}
-              error={errors.technologies}
-            />
+            <div className="relative" ref={techDropdownRef}>
+              <Label>Technologies</Label>
+              <div className="relative">
+                <div
+                  className={`min-h-[42px] w-full rounded-md border ${
+                    errors.technologies ? 'border-red-500' : 'border-gray-300'
+                  } bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer flex flex-wrap gap-1`}
+                  onClick={() => setIsTechDropdownOpen(!isTechDropdownOpen)}
+                >
+                  {formData.technologies.length === 0 ? (
+                    <span className="text-gray-500">Select technologies...</span>
+                  ) : (
+                    formData.technologies.map(techId => {
+                      const tech = technologies.find(t => t.id === techId);
+                      return tech ? (
+                        <span
+                          key={tech.id}
+                          className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md text-sm"
+                        >
+                          {tech.name}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeTechnology(tech.id);
+                            }}
+                            className="hover:text-indigo-900"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ) : null;
+                    })
+                  )}
+                </div>
+
+                {isTechDropdownOpen && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border border-gray-300">
+                    <div className="p-2 border-b border-gray-200">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="text"
+                          placeholder="Search technologies..."
+                          value={techSearch}
+                          onChange={(e) => setTechSearch(e.target.value)}
+                          className="pl-8"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-60 overflow-auto p-1">
+                      {filteredTechnologies.length === 0 ? (
+                        <div className="px-2 py-3 text-sm text-gray-500">No technologies found</div>
+                      ) : (
+                        filteredTechnologies.map((tech) => (
+                          <div
+                            key={tech.id}
+                            className={`flex items-center justify-between px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100 ${
+                              formData.technologies.includes(tech.id) ? 'bg-indigo-50' : ''
+                            }`}
+                            onClick={() => toggleTechnology(tech.id)}
+                          >
+                            <span>{tech.name}</span>
+                            {formData.technologies.includes(tech.id) && (
+                              <Check className="h-4 w-4 text-indigo-600" />
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {errors.technologies && (
+                <p className="mt-1 text-sm text-red-500">{errors.technologies}</p>
+              )}
+            </div>
 
             <div>
               <Label htmlFor="featured_image">Featured Image</Label>
-              <Input
-                id="featured_image"
-                name="featured_image"
-                type="file"
-                onChange={handleImageUpload}
-                accept="image/*"
-                className={errors.featured_image_path ? 'border-red-500' : ''}
-              />
+              <div className="mt-2 flex items-center gap-4">
+                <Input
+                  id="featured_image"
+                  type="file"
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="w-full"
+                />
+              </div>
               {errors.featured_image_path && (
-                <p className="mt-1 text-sm text-red-500">{errors.featured_image_path}</p>
+                <p className="mt-1 text-sm text-red-600">{errors.featured_image_path}</p>
               )}
-              {imagePreview && (
-                <div className="mt-2">
+              {/* Image Preview */}
+              {(imagePreview || formData.featured_image_path) && (
+                <div className="mt-4 relative">
                   <img
-                    src={imagePreview}
-                    alt="Project featured image preview"
-                    className="w-32 h-32 object-cover rounded"
-                  />
-                </div>
-              )}
-              {!imagePreview && formData.featured_image_path && (
-                <div className="mt-2">
-                  <img
-                    src={formData.featured_image_path}
-                    alt="Current project featured image"
-                    className="w-32 h-32 object-cover rounded"
+                    src={imagePreview || getImageUrl(formData.featured_image_path)}
+                    alt="Preview"
+                    className="max-w-full h-48 object-cover rounded-lg"
                   />
                 </div>
               )}
@@ -336,4 +471,4 @@ export default function ProjectEdit({ project, technologies, categories }: PageP
       </div>
     </AppLayout>
   );
-} 
+}
