@@ -12,10 +12,14 @@ interface Skill {
     is_active: boolean;
 }
 
-function skill() {
+interface Props {
+    skills: Skill[];
+}
+
+function Skills() {
     const { skills } = usePage<{ skills: Skill[] }>().props;
 
-    // Filter active skills and sort by order
+    // Filter only active skills and sort by order
     const activeSkills = skills
         .filter(skill => skill.is_active)
         .sort((a, b) => a.order - b.order);
@@ -88,9 +92,7 @@ function skill() {
                                 <div className="text-gray-600 font-bold text-lg mt-2">
                                     {skill.proficiency}%
                                 </div>
-                                <div className="font-medium text-purple-600 text-sm">
-                                    {skill.name}
-                                </div>
+                                <div className="font-medium text-purple-600 text-sm">{skill.name}</div>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -100,4 +102,4 @@ function skill() {
     );
 }
 
-export default skill;
+export default Skills; 

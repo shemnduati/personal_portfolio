@@ -8,6 +8,8 @@ use App\Models\Technology;
 use App\Models\Partner;
 use App\Models\Experience;
 use App\Models\Education;
+use App\Models\Testimonial;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -36,7 +38,9 @@ class HomeController extends Controller
             'technologies' => Technology::all(),
             'partners' => Partner::where('is_active', true)->orderBy('order')->get(),
             'experiences' => Experience::where('is_active', true)->orderBy('order')->get(),
-            'education' => Education::where('is_active', true)->orderBy('order')->get()
+            'education' => Education::where('is_active', true)->orderBy('order')->get(),
+            'testimonials' => Testimonial::where('is_active', true)->orderBy('order')->get(),
+            'skills' => Skill::where('is_active', true)->orderBy('order')->get()
         ]);
     }
 } 

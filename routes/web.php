@@ -14,6 +14,8 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\EducationController;
+use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\SkillController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -86,6 +88,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/education/{education}/edit', [EducationController::class, 'edit'])->name('education.edit');
     Route::post('/admin/education/{education}', [EducationController::class, 'update'])->name('education.update');
     Route::delete('/admin/education/{education}', [EducationController::class, 'destroy'])->name('education.destroy');
+
+    // Testimonial routes
+    Route::get('/admin/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+    Route::get('/admin/testimonials/create', [TestimonialController::class, 'create'])->name('testimonials.create');
+    Route::post('/admin/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
+    Route::get('/admin/testimonials/{testimonial}/edit', [TestimonialController::class, 'edit'])->name('testimonials.edit');
+    Route::post('/admin/testimonials/{testimonial}', [TestimonialController::class, 'update'])->name('testimonials.update');
+    Route::delete('/admin/testimonials/{testimonial}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy');
+
+    // Skill routes
+    Route::get('/admin/skills', [SkillController::class, 'index'])->name('skills.index');
+    Route::get('/admin/skills/create', [SkillController::class, 'create'])->name('skills.create');
+    Route::post('/admin/skills', [SkillController::class, 'store'])->name('skills.store');
+    Route::get('/admin/skills/{skill}/edit', [SkillController::class, 'edit'])->name('skills.edit');
+    Route::post('/admin/skills/{skill}', [SkillController::class, 'update'])->name('skills.update');
+    Route::delete('/admin/skills/{skill}', [SkillController::class, 'destroy'])->name('skills.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
