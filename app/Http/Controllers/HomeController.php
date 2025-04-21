@@ -10,6 +10,7 @@ use App\Models\Experience;
 use App\Models\Education;
 use App\Models\Testimonial;
 use App\Models\Skill;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -40,7 +41,8 @@ class HomeController extends Controller
             'experiences' => Experience::where('is_active', true)->orderBy('order')->get(),
             'education' => Education::where('is_active', true)->orderBy('order')->get(),
             'testimonials' => Testimonial::where('is_active', true)->orderBy('order')->get(),
-            'skills' => Skill::where('is_active', true)->orderBy('order')->get()
+            'skills' => Skill::where('is_active', true)->orderBy('order')->get(),
+            'services' => Service::where('is_active', true)->orderBy('order')->get()
         ]);
     }
 } 

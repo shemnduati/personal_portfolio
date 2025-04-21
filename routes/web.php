@@ -16,6 +16,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ServiceController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -104,6 +105,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/skills/{skill}/edit', [SkillController::class, 'edit'])->name('skills.edit');
     Route::post('/admin/skills/{skill}', [SkillController::class, 'update'])->name('skills.update');
     Route::delete('/admin/skills/{skill}', [SkillController::class, 'destroy'])->name('skills.destroy');
+
+    Route::resource('admin/services', ServiceController::class)->names('services');
 });
 
 Route::middleware(['auth'])->group(function () {
