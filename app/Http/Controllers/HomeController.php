@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Models\Project;
+use App\Models\Technology;
+use App\Models\Partner;
+use App\Models\Experience;
+use App\Models\Education;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,7 +31,12 @@ class HomeController extends Controller
         ];
 
         return Inertia::render('home', [
-            'settings' => $settings
+            'settings' => $settings,
+            'projects' => Project::with('technologies', 'category')->get(),
+            'technologies' => Technology::all(),
+            'partners' => Partner::where('is_active', true)->orderBy('order')->get(),
+            'experiences' => Experience::where('is_active', true)->orderBy('order')->get(),
+            'education' => Education::where('is_active', true)->orderBy('order')->get()
         ]);
     }
 } 

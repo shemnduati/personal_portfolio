@@ -9,6 +9,7 @@ import Experience from '@/components/Sections/experience';
 import Skill from '@/components/Sections/skill';
 import Testimonials from '@/components/Sections/testimonials';
 import Blogs from '@/components/Sections/blog';
+import Partners from '@/components/Sections/partners';
 import Contact from '@/components/Sections/contact';
 import Footer from '@/components/Sections/footer';
 import {  Mail, MapPin, MessageSquare, MoveDownRight,  MoveUp,  MoveUpRight,  PhoneCall,  QuoteIcon,  Twitter } from 'lucide-react';
@@ -34,6 +35,7 @@ export default function Home() {
             <Skill/>
             <Testimonials />
             <Blogs />
+            <Partners />
             <Contact />
             <Footer />
              {/* Back to Top Button */}

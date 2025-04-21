@@ -11,6 +11,9 @@ use App\Http\Controllers\TechnologyController;
 use Inertia\Inertia;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\EducationController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -59,6 +62,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/messages', [ContactController::class, 'index'])->name('admin.messages.index');
     Route::post('/admin/messages/{submission}/mark-as-read', [ContactController::class, 'markAsRead'])->name('admin.messages.mark-as-read');
     Route::delete('/admin/messages/{submission}', [ContactController::class, 'destroy'])->name('admin.messages.destroy');
+
+    // Partner routes
+    Route::get('/admin/partners', [PartnerController::class, 'index'])->name('partners.index');
+    Route::get('/admin/partners/create', [PartnerController::class, 'create'])->name('partners.create');
+    Route::post('/admin/partners', [PartnerController::class, 'store'])->name('partners.store');
+    Route::get('/admin/partners/{partner}/edit', [PartnerController::class, 'edit'])->name('partners.edit');
+    Route::post('/admin/partners/{partner}', [PartnerController::class, 'update'])->name('partners.update');
+    Route::delete('/admin/partners/{partner}', [PartnerController::class, 'destroy'])->name('partners.destroy');
+
+    // Experience routes
+    Route::get('/admin/experiences', [ExperienceController::class, 'index'])->name('experiences.index');
+    Route::get('/admin/experiences/create', [ExperienceController::class, 'create'])->name('experiences.create');
+    Route::post('/admin/experiences', [ExperienceController::class, 'store'])->name('experiences.store');
+    Route::get('/admin/experiences/{experience}/edit', [ExperienceController::class, 'edit'])->name('experiences.edit');
+    Route::post('/admin/experiences/{experience}', [ExperienceController::class, 'update'])->name('experiences.update');
+    Route::delete('/admin/experiences/{experience}', [ExperienceController::class, 'destroy'])->name('experiences.destroy');
+
+    // Education routes
+    Route::get('/admin/education', [EducationController::class, 'index'])->name('education.index');
+    Route::get('/admin/education/create', [EducationController::class, 'create'])->name('education.create');
+    Route::post('/admin/education', [EducationController::class, 'store'])->name('education.store');
+    Route::get('/admin/education/{education}/edit', [EducationController::class, 'edit'])->name('education.edit');
+    Route::post('/admin/education/{education}', [EducationController::class, 'update'])->name('education.update');
+    Route::delete('/admin/education/{education}', [EducationController::class, 'destroy'])->name('education.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
