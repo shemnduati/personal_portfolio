@@ -20,7 +20,7 @@ import {
   Heading3,
   Type
 } from 'lucide-react';
-import '@/css/tiptap.css';
+import '../css/tiptap.css';
 
 interface TipTapEditorProps {
   content: string;
