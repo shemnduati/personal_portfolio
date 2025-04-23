@@ -43,12 +43,6 @@ jobs:
             php artisan key:generate
           fi
           
-      # Cache Configuration
-      - name: Cache Configuration
-        run: |
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
           
       # Create deployment artifact
       - name: Create deployment artifact
