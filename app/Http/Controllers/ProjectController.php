@@ -23,6 +23,17 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function publicIndex()
+    {
+        $projects = Project::with(['technologies', 'category'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('project/page/index', [
+            'projects' => $projects
+        ]);
+    }
+
     public function create()
     {
         $technologies = Technology::orderBy('name')->get();
@@ -56,7 +67,7 @@ class ProjectController extends Controller
             $project->technologies()->sync($validated['technologies']);
         }
 
-        return redirect()->route('projects.index')
+        return redirect()->route('admin.projects.index')
             ->with('success', 'Project created successfully.');
     }
 
@@ -102,7 +113,7 @@ class ProjectController extends Controller
             $project->technologies()->sync($validated['technologies']);
         }
 
-        return redirect()->route('projects.index')
+        return redirect()->route('admin.projects.index')
             ->with('success', 'Project updated successfully.');
     }
 
@@ -110,7 +121,7 @@ class ProjectController extends Controller
     {
         $project->load(['technologies', 'category']);
         
-        return Inertia::render('project/[id]', [
+        return Inertia::render('project/page/[id]', [
             'project' => $project
         ]);
     }
@@ -119,7 +130,7 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return redirect()->route('projects.index')
+        return redirect()->route('admin.projects.index')
             ->with('success', 'Project deleted successfully.');
     }
 

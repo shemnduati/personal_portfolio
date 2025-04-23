@@ -44,7 +44,7 @@ export default function ServiceIndex({ services }: { services: Service[] }) {
         <AppLayout>
             <Head title="Services" />
 
-            <div className="container py-8">
+            <div className="container p-8">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-2xl font-bold">Services</h1>
                     <Button asChild>

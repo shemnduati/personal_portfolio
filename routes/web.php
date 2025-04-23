@@ -39,13 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::post('settings/blog-enabled', [SettingsController::class, 'updateBlogStatus']);
 
      // Projects web routes
-     Route::get('/admin/projects', [ProjectController::class, 'index'])->name('projects.index');
-     Route::get('/admin/projects/create', [ProjectController::class, 'create'])->name('projects.create');
-     Route::post('/admin/projects/upload-image', [ProjectController::class, 'uploadImage'])->name('projects.upload-image');
-     Route::post('/admin/projects', [ProjectController::class, 'store'])->name('projects.store');
-     Route::get('/admin/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
-     Route::post('/admin/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
-     Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+     Route::get('/admin/projects', [ProjectController::class, 'index'])->name('admin.projects.index');
+     Route::get('/admin/projects/create', [ProjectController::class, 'create'])->name('admin.projects.create');
+     Route::post('/admin/projects/upload-image', [ProjectController::class, 'uploadImage'])->name('admin.projects.upload-image');
+     Route::post('/admin/projects', [ProjectController::class, 'store'])->name('admin.projects.store');
+     Route::get('/admin/projects/{project}/edit', [ProjectController::class, 'edit'])->name('admin.projects.edit');
+     Route::post('/admin/projects/{project}', [ProjectController::class, 'update'])->name('admin.projects.update');
+     Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('admin.projects.destroy');
 
      // Technologies web routes
      Route::get('/admin/technologies', [TechnologyController::class, 'index'])->name('technologies.index');
@@ -124,7 +124,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Public routes
 Route::get('api/featured-projects', [ApiProjectController::class, 'getFeaturedProjects']);
-Route::get('projects', [ProjectController::class, 'index']);
+Route::get('projects', [ProjectController::class, 'publicIndex'])->name('projects.index');
 Route::get('projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
 
 // Public blog routes (if enabled)
