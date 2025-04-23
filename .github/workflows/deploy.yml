@@ -42,8 +42,7 @@ jobs:
             cp .env.example .env
             php artisan key:generate
           fi
-          
-          
+            
       # Create deployment artifact
       - name: Create deployment artifact
         run: |
