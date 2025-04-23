@@ -124,7 +124,6 @@ Route::middleware(['auth'])->group(function () {
 
 // Public routes
 Route::get('api/featured-projects', [ApiProjectController::class, 'getFeaturedProjects']);
-Route::get('projects', [ProjectController::class, 'publicIndex'])->name('projects.index');
 Route::get('projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
 
 // Public blog routes (if enabled)
