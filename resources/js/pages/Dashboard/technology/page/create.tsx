@@ -4,6 +4,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Input } from '@/components/ui/input';
 import { 
   ArrowLeft,
   Save,
@@ -102,13 +103,13 @@ function TechnologyCreateContent() {
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Name <span className="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
+                className={errors.name ? 'border-red-500' : ''}
                 required
               />
               {errors.name && (

@@ -121,7 +121,7 @@ class ProjectController extends Controller
     {
         $project->load(['technologies', 'category']);
         
-        return Inertia::render('project/page/[id]', [
+        return Inertia::render('project/[id]', [
             'project' => $project
         ]);
     }
@@ -136,21 +136,6 @@ class ProjectController extends Controller
 
     public function uploadImage(Request $request)
     {
-        \Log::info('Upload image request received', [
-            'is_ajax' => $request->ajax(),
-            'has_file' => $request->hasFile('image'),
-            'content_type' => $request->header('Content-Type'),
-            'all_headers' => $request->headers->all()
-        ]);
-
-        // Check if this is an AJAX request
-        if (!$request->ajax()) {
-            \Log::error('Non-AJAX request received');
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid request method'
-            ], 400);
-        }
 
         try {
             $request->validate([
@@ -160,33 +145,11 @@ class ProjectController extends Controller
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $filename = time() . '_' . $image->getClientOriginalName();
-                
-                \Log::info('Processing image upload', [
-                    'original_name' => $image->getClientOriginalName(),
-                    'mime_type' => $image->getMimeType(),
-                    'size' => $image->getSize()
-                ]);
-
+            
                 $path = $image->storeAs('projects', $filename, 'public');
-                
-                \Log::info('Image uploaded successfully', ['path' => $path]);
-                
-                return response()->json([
-                    'success' => true,
-                    'image_path' => $path
-                ]);
             }
 
-            \Log::error('No image file found in request');
-            return response()->json([
-                'success' => false,
-                'message' => 'No image uploaded'
-            ], 400);
         } catch (\Exception $e) {
-            \Log::error('Error uploading image', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             
             return response()->json([
                 'success' => false,

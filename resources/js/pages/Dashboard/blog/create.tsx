@@ -61,10 +61,10 @@ export default function CreateBlog({ categories }: PageProps) {
     const [tags, setTags] = useState<string[]>([]);
     
     const { data, setData, post, processing, errors, reset } = useForm({
-        title: '',
-        content: '',
-        excerpt: '',
-        featured_image: null as File | null,
+    title: '',
+    content: '',
+    excerpt: '',
+    featured_image: null as File | null,
         is_published: false as boolean,
         meta_title: null as string | null,
         meta_description: null as string | null,
@@ -154,7 +154,7 @@ export default function CreateBlog({ categories }: PageProps) {
 
     const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && tagInput.trim()) {
-            e.preventDefault();
+    e.preventDefault();
             console.log('Adding tag:', tagInput.trim());
             if (!tags.includes(tagInput.trim())) {
                 const newTags = [...tags, tagInput.trim()];
@@ -170,16 +170,16 @@ export default function CreateBlog({ categories }: PageProps) {
         const newTags = tags.filter(tag => tag !== tagToRemove);
         console.log('Updated tags after removal:', newTags);
         setTags(newTags);
-    };
+ };
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Blog Post" />
             
             <div className="container mx-auto py-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Create New Blog Post</CardTitle>
+                    <CardTitle>Create New Blog Post</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="publish-status">Publish</Label>
                             <Switch 
@@ -188,7 +188,7 @@ export default function CreateBlog({ categories }: PageProps) {
                                 onCheckedChange={togglePublish} 
                             />
                         </div>
-                    </CardHeader>
+                </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -198,13 +198,13 @@ export default function CreateBlog({ categories }: PageProps) {
                                         <Input
                                             id="title"
                                             type="text"
-                                            value={data.title}
-                                            onChange={(e) => setData('title', e.target.value)}
+                                    value={data.title} 
+                                    onChange={(e) => setData('title', e.target.value)}
                                             placeholder="Enter blog title"
                                             required
                                             className={errors.title ? 'border-red-500' : ''}
-                                        />
-                                        {errors.title && (
+                            />
+                            {errors.title && (
                                             <p className="text-sm text-red-500">{errors.title}</p>
                                         )}
                                     </div>
@@ -228,24 +228,24 @@ export default function CreateBlog({ categories }: PageProps) {
                                         </Select>
                                         {errors.category_id && (
                                             <p className="text-sm text-red-500">{errors.category_id}</p>
-                                        )}
-                                    </div>
+                            )}
+                        </div>
 
                                     <div className="space-y-2">
                                         <Label htmlFor="excerpt">Excerpt</Label>
                                         <Input
-                                            id="excerpt"
+                                id="excerpt"
                                             type="text"
-                                            value={data.excerpt}
-                                            onChange={(e) => setData('excerpt', e.target.value)}
+                                value={data.excerpt}
+                                onChange={(e) => setData('excerpt', e.target.value)}
                                             placeholder="Brief summary of your blog post"
                                             required
                                             className={errors.excerpt ? 'border-red-500' : ''}
-                                        />
-                                        {errors.excerpt && (
+                            />
+                            {errors.excerpt && (
                                             <p className="text-sm text-red-500">{errors.excerpt}</p>
-                                        )}
-                                    </div>
+                            )}
+                        </div>
 
                                     <div className="space-y-2">
                                         <Label htmlFor="content">Content</Label>
@@ -271,11 +271,11 @@ export default function CreateBlog({ categories }: PageProps) {
                                             </TabsContent>
                                         </Tabs>
                                     </div>
-                                </div>
+                        </div>
 
                                 <div className="space-y-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="featured_image">Featured Image</Label>
+                            <Label htmlFor="featured_image">Featured Image</Label>
                                         <div className="border-2 border-dashed rounded-md p-4 text-center">
                                             {imagePreview ? (
                                                 <div className="space-y-2">
@@ -355,7 +355,7 @@ export default function CreateBlog({ categories }: PageProps) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                        </div>
 
                             {/* Tags Section */}
                             <div>
@@ -390,7 +390,7 @@ export default function CreateBlog({ categories }: PageProps) {
                                 <p className="mt-1 text-sm text-gray-500">
                                     Press Enter to add a tag
                                 </p>
-                            </div>
+                        </div>
 
                             <CardFooter className="flex justify-end space-x-2 pt-6">
                                 <Button 
@@ -423,12 +423,12 @@ export default function CreateBlog({ categories }: PageProps) {
                                 >
                                     <Send className="mr-2 h-4 w-4" />
                                     {data.is_published ? 'Publish' : 'Save'}
-                                </Button>
+                        </Button>
                             </CardFooter>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
-        </AppLayout>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    </AppLayout>
     );
 }

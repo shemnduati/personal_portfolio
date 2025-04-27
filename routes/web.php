@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::post('/admin/projects/upload-image', [ProjectController::class, 'uploadImage'])->name('admin.projects.upload-image');
      Route::post('/admin/projects', [ProjectController::class, 'store'])->name('admin.projects.store');
      Route::get('/admin/projects/{project}/edit', [ProjectController::class, 'edit'])->name('admin.projects.edit');
-     Route::post('/admin/projects/{project}', [ProjectController::class, 'update'])->name('admin.projects.update');
+     Route::match(['put', 'post'], '/admin/projects/{project}', [ProjectController::class, 'update'])->name('admin.projects.update');
      Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('admin.projects.destroy');
 
      // Technologies web routes
@@ -139,3 +139,14 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+// In your web.php
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+    $path = storage_path('app/public/' . $folder . '/' . $filename);
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+});

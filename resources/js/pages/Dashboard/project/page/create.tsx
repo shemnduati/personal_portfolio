@@ -415,25 +415,20 @@ function ProjectCreateContent() {
 
           <div>
             <Label htmlFor="featured_image">Featured Image</Label>
-            <Input
-              id="featured_image"
-              name="featured_image"
-              type="file"
-              onChange={handleImageUpload}
-              accept="image/*"
-              className={errors.featured_image_path ? 'border-red-500' : ''}
-            />
+            <div className="mt-2 flex items-center gap-4">
+              <Input
+                id="featured_image"
+                type="file"
+                onChange={handleImageUpload}
+                accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
+                className="w-full"
+              />
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Accepted formats: JPEG, PNG, JPG, GIF, SVG. Max size: 2MB
+            </p>
             {errors.featured_image_path && (
               <p className="mt-1 text-sm text-red-600">{errors.featured_image_path}</p>
-            )}
-            {imagePreview && (
-              <div className="mt-2">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover rounded"
-                />
-              </div>
             )}
           </div>
 
