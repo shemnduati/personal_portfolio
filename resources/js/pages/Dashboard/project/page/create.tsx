@@ -16,6 +16,7 @@ import {
   Check,
   Search
 } from 'lucide-react';
+import { Editor } from '@tinymce/tinymce-react';
 
 // Define types for our data
 interface Technology {
@@ -298,15 +299,41 @@ function ProjectCreateContent() {
 
           <div>
             <Label htmlFor="content">Full Content <span className="text-red-500">*</span></Label>
-            <Textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleInputChange}
-              className={errors.content ? 'border-red-500' : ''}
-              rows={10}
-              required
-            />
+            <div className="mt-1">
+              <Editor
+                id="content"
+                apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+                value={formData.content}
+                onEditorChange={(content) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    content
+                  }));
+                  // Clear error when field is edited
+                  if (errors.content) {
+                    setErrors(prev => {
+                      const newErrors = { ...prev };
+                      delete newErrors.content;
+                      return newErrors;
+                    });
+                  }
+                }}
+                init={{
+                  height: 500,
+                  menubar: true,
+                  plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                  ],
+                  toolbar: 'undo redo | blocks | ' +
+                    'bold italic forecolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                }}
+              />
+            </div>
             {errors.content && (
               <p className="mt-1 text-sm text-red-600">{errors.content}</p>
             )}
@@ -498,4 +525,4 @@ export default function ProjectCreate() {
       </ErrorBoundary>
     </AppLayout>
   );
-} 
+}

@@ -136,7 +136,6 @@ class ProjectController extends Controller
 
     public function uploadImage(Request $request)
     {
-
         try {
             $request->validate([
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
@@ -147,10 +146,20 @@ class ProjectController extends Controller
                 $filename = time() . '_' . $image->getClientOriginalName();
             
                 $path = $image->storeAs('projects', $filename, 'public');
+
+                return response()->json([
+                    'success' => true,
+                    'image_path' => $path
+                ]);
             }
 
+            return response()->json([
+                'success' => false,
+                'message' => 'No image file provided'
+            ], 400);
+
         } catch (\Exception $e) {
-            
+            Log::error('Image upload error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error uploading image: ' . $e->getMessage()

@@ -1,235 +1,193 @@
 import React, { useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import TextAlign from '@tiptap/extension-text-align';
-import { Button } from '@/components/ui/button';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { lowlight } from 'lowlight';
 import { 
   Bold, 
   Italic, 
+  Strikethrough, 
+  Code, 
+  Heading1, 
+  Heading2, 
+  Heading3, 
   List, 
   ListOrdered, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Heading1,
-  Heading2,
-  Heading3,
-  Type
+  Quote, 
+  Undo, 
+  Redo,
+  MinusSquare,
+  Type,
+  Eraser
 } from 'lucide-react';
-import '../css/tiptap.css';
 
-interface TipTapEditorProps {
-  content: string;
-  onChange: (content: string) => void;
-  placeholder?: string;
-}
-
-export default function TipTapEditor({ content, onChange, placeholder }: TipTapEditorProps) {
+const TipTapEditor = ({ content, onChange, placeholder }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Image.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto',
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-500 underline',
-        },
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
+      CodeBlockLowlight.configure({
+        lowlight,
       }),
     ],
-    content,
+    content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] max-h-[600px] overflow-y-auto p-4 border rounded-b-lg',
+      },
+    },
   });
-
-  const addImage = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = async () => {
-      if (input.files?.length) {
-        const file = input.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        try {
-          const response = await fetch('/admin/upload-image', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            editor?.chain().focus().setImage({ src: data.url }).run();
-          } else {
-            console.error('Failed to upload image');
-          }
-        } catch (error) {
-          console.error('Error uploading image:', error);
-        }
-      }
-    };
-    
-    input.click();
-  };
-
-  const addLink = () => {
-    const url = window.prompt('Enter URL');
-    if (url) {
-      editor?.chain().focus().setLink({ href: url }).run();
-    }
-  };
 
   if (!editor) {
     return null;
   }
 
+  const ToolbarButton = ({ onClick, active, disabled, children, title }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`p-2 rounded-lg transition-colors ${
+        active 
+          ? 'bg-indigo-100 text-indigo-900' 
+          : 'text-gray-600 hover:bg-gray-100'
+      } ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+      }`}
+    >
+      {children}
+    </button>
+  );
+
   return (
-    <div className="border rounded-md">
-      <div className="tiptap-toolbar">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'is-active' : ''}
-          title="Bold"
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'is-active' : ''}
-          title="Italic"
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editor.isActive('paragraph') ? 'is-active' : ''}
-          title="Paragraph"
-        >
-          <Type className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
-          title="Heading 1"
-        >
-          <Heading1 className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
-          title="Heading 2"
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
-          title="Heading 3"
-        >
-          <Heading3 className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'is-active' : ''}
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'is-active' : ''}
-          title="Numbered List"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addImage}
-          title="Add Image"
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
-          title="Align Left"
-        >
-          <AlignLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
-          title="Align Center"
-        >
-          <AlignCenter className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
-          title="Align Right"
-        >
-          <AlignRight className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addLink}
-          className={editor.isActive('link') ? 'is-active' : ''}
-          title="Add Link"
-        >
-          <LinkIcon className="h-4 w-4" />
-        </Button>
+    <div className="border rounded-lg overflow-hidden">
+      <div className="border-b bg-white p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10">
+        <div className="flex items-center gap-1 border-r pr-2">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            active={editor.isActive('bold')}
+            title="Bold"
+          >
+            <Bold className="w-4 h-4" />
+          </ToolbarButton>
+          
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            active={editor.isActive('italic')}
+            title="Italic"
+          >
+            <Italic className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            active={editor.isActive('strike')}
+            title="Strike"
+          >
+            <Strikethrough className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            active={editor.isActive('code')}
+            title="Inline Code"
+          >
+            <Code className="w-4 h-4" />
+          </ToolbarButton>
+        </div>
+
+        <div className="flex items-center gap-1 border-r pr-2">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            active={editor.isActive('heading', { level: 1 })}
+            title="Heading 1"
+          >
+            <Heading1 className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            active={editor.isActive('heading', { level: 2 })}
+            title="Heading 2"
+          >
+            <Heading2 className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            active={editor.isActive('heading', { level: 3 })}
+            title="Heading 3"
+          >
+            <Heading3 className="w-4 h-4" />
+          </ToolbarButton>
+        </div>
+
+        <div className="flex items-center gap-1 border-r pr-2">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            active={editor.isActive('bulletList')}
+            title="Bullet List"
+          >
+            <List className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            active={editor.isActive('orderedList')}
+            title="Ordered List"
+          >
+            <ListOrdered className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            active={editor.isActive('blockquote')}
+            title="Blockquote"
+          >
+            <Quote className="w-4 h-4" />
+          </ToolbarButton>
+        </div>
+
+        <div className="flex items-center gap-1 border-r pr-2">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            title="Horizontal Rule"
+          >
+            <MinusSquare className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().clearNodes().run()}
+            title="Clear Formatting"
+          >
+            <Eraser className="w-4 h-4" />
+          </ToolbarButton>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            title="Undo"
+          >
+            <Undo className="w-4 h-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            title="Redo"
+          >
+            <Redo className="w-4 h-4" />
+          </ToolbarButton>
+        </div>
       </div>
-      <EditorContent editor={editor} className="ProseMirror" />
+
+      <EditorContent editor={editor} className="bg-white" />
     </div>
   );
-} 
+};
+
+export default TipTapEditor;

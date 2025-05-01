@@ -61,10 +61,10 @@ export default function CreateBlog({ categories }: PageProps) {
     const [tags, setTags] = useState<string[]>([]);
     
     const { data, setData, post, processing, errors, reset } = useForm({
-    title: '',
-    content: '',
-    excerpt: '',
-    featured_image: null as File | null,
+        title: '',
+        content: '',
+        excerpt: '',
+        featured_image: null as File | null,
         is_published: false as boolean,
         meta_title: null as string | null,
         meta_description: null as string | null,
@@ -247,29 +247,37 @@ export default function CreateBlog({ categories }: PageProps) {
                             )}
                         </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="content">Content</Label>
-                                        <Tabs value={activeTab} onValueChange={setActiveTab}>
-                                            <TabsList className="mb-2">
-                                                <TabsTrigger value="edit">Edit</TabsTrigger>
-                                                <TabsTrigger value="preview">Preview</TabsTrigger>
-                                            </TabsList>
-                                            <TabsContent value="edit">
-                                                <TipTapEditor
-                                                    content={data.content}
-                                                    onChange={(content) => setData('content', content)}
-                                                    placeholder="Write your blog content here..."
-                                                />
-                                                {errors.content && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.content}</p>
-                                                )}
-                                            </TabsContent>
-                                            <TabsContent value="preview">
-                                                <div className="border rounded-md p-4 min-h-[300px] prose max-w-none">
-                                                    <div dangerouslySetInnerHTML={{ __html: data.content }} />
-                                                </div>
-                                            </TabsContent>
-                                        </Tabs>
+                        <div>
+                            <Label htmlFor="content">Content <span className="text-red-500">*</span></Label>
+                            <div className="mt-1">
+                                <Editor
+                                id="content"
+                                apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+                                value={data.content}
+                                onEditorChange={(content) => {
+                                    setData('content', content);
+                                    // No need for error clearing here as setData handles it
+                                }}
+                                init={{
+                                    height: 500,
+                                    menubar: true,
+                                    plugins: [
+                                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                                    ],
+                                    toolbar: 'undo redo | blocks | ' +
+                                    'bold italic forecolor | alignleft aligncenter ' +
+                                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                                    'removeformat | help',
+                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                                }}
+                                />
+                            </div>
+                            {errors.content && (
+                                <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+                            )}
+
                                     </div>
                         </div>
 
@@ -379,7 +387,7 @@ export default function CreateBlog({ categories }: PageProps) {
                                         </span>
                                     ))}
                                 </div>
-                                <input
+                                <Input
                                     type="text"
                                     value={tagInput}
                                     onChange={(e) => setTagInput(e.target.value)}

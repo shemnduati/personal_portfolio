@@ -8,6 +8,7 @@ import { ImageUpload } from '@/components/ImageUpload';
 import { ArrowLeft, Save, Eye, Calendar, Clock, MessageSquare, Minus, Quote, User } from 'lucide-react';
 import { motion } from 'framer-react';
 import { Editor } from '@tinymce/tinymce-react';
+import { Input } from '@/components/ui/input';
 
 interface Blog {
   id: number;
@@ -80,6 +81,7 @@ export default function EditBlog() {
     is_published: blog.is_published,
     meta_title: blog.meta_title,
     meta_description: blog.meta_description,
+    published_at:blog.published_at,
     category_id: blog.category_id.toString(),
     tags: tags
   });
@@ -325,14 +327,36 @@ export default function EditBlog() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Content</h2>
+            <div>
+              <label htmlFor="content">Content <span className="text-red-500">*</span></label>
               <div className="mt-1">
-                <TipTapEditor
-                  content={data.content}
-                  onChange={(content) => setData('content', content)}
+                <Editor
+                  id="content"
+                  apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+                  value={data.content}
+                  onEditorChange={(content) => {
+                    setData('content', content);
+                    // No need for error clearing here as setData handles it
+                  }}
+                  init={{
+                    height: 500,
+                    menubar: true,
+                    plugins: [
+                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                    ],
+                    toolbar: 'undo redo | blocks | ' +
+                      'bold italic forecolor | alignleft aligncenter ' +
+                      'alignright alignjustify | bullist numlist outdent indent | ' +
+                      'removeformat | help',
+                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                  }}
                 />
               </div>
+              {errors.content && (
+                <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+              )}
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -376,7 +400,7 @@ export default function EditBlog() {
                       Publication Date
                     </label>
                     <div className="flex items-center space-x-4">
-                      <input
+                      <Input
                         type="datetime-local"
                         id="published_at"
                         value={data.published_at}

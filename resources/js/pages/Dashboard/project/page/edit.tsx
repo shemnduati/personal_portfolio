@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Link, router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { ArrowLeft, X, Check, Search } from 'lucide-react';
+import { Editor } from '@tinymce/tinymce-react';
 
 // Define types for our data
 interface Technology {
@@ -169,33 +170,13 @@ export default function ProjectEdit({ project, technologies = [], categories = [
       },
     })
       .then(async response => {
-        const responseText = await response.text();
-        console.log('Server response:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: responseText
-        });
-
+        const data = await response.json();
+        
         if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status} ${responseText}`);
+          throw new Error(data.message || `Upload failed: ${response.status}`);
         }
 
-        // Try to parse the response as JSON
-        try {
-          const data = JSON.parse(responseText);
-          // Handle both response formats (project and blog)
-          if (data.url) {
-            // Convert blog format to project format
-            return {
-              success: true,
-              image_path: data.url.replace('/storage/', '')
-            };
-          }
-          return data;
-        } catch (e) {
-          console.error('Failed to parse response as JSON:', responseText);
-          throw new Error('Invalid server response format');
-        }
+        return data;
       })
       .then(data => {
         if (data.success) {
@@ -283,17 +264,44 @@ export default function ProjectEdit({ project, technologies = [], categories = [
             </div>
 
             <div>
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleInputChange}
-                className={errors.content ? 'border-red-500' : ''}
-                rows={10}
-              />
+              <Label htmlFor="content">Full Content <span className="text-red-500">*</span></Label>
+              <div className="mt-1">
+                <Editor
+                  id="content"
+                  apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+                  value={formData.content}
+                  onEditorChange={(content) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      content
+                    }));
+                    // Clear error when field is edited
+                    if (errors.content) {
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.content;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  init={{
+                    height: 500,
+                    menubar: true,
+                    plugins: [
+                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                    ],
+                    toolbar: 'undo redo | blocks | ' +
+                      'bold italic forecolor | alignleft aligncenter ' +
+                      'alignright alignjustify | bullist numlist outdent indent | ' +
+                      'removeformat | help',
+                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                  }}
+                />
+              </div>
               {errors.content && (
-                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+                <p className="mt-1 text-sm text-red-600">{errors.content}</p>
               )}
             </div>
 
